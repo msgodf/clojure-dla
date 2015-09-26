@@ -70,7 +70,7 @@
 
 (t/defn step
   "Consume a direction from the provided sequence, apply it to the provided
-   location, and return an updated location.
+   location, and return an updated location along with the remaining directions.
 
    It takes a vector, because it's written to be used with clojure.core/iterate,
    which takes a single value."
