@@ -61,26 +61,39 @@
                (= location (walk coordinate :right))))
          locations))
 
+(t/defn outside-kill-radius?
+  [coordinate :- Coordinate
+   kill-radius :- Radius]
+  (> (Math/sqrt (double (+ (* (first coordinate) (first coordinate))
+                           (* (second coordinate) (second coordinate)))))
+     kill-radius))
+
+(t/defn step
+  "Consume a direction from the provided sequence, apply it to the provided
+   location, and return an updated location.
+
+   It takes a vector, because it's written to be used with clojure.core/iterate,
+   which takes a single value."
+  [[location directions] :- (t/HVec [Coordinate Directions])] :- (t/HVec [Coordinate Directions])
+  (if (seq directions)
+    [(walk location (first directions))
+     (rest directions)]
+    (throw (IllegalStateException. "Empty directions sequence (likely because it has been exhausted."))))
 (t/defn tick
   "Launches a new particle and walks it until it fixes to the existing lattice."
   [locations :- FixedLocations
    directions :- Directions
    launch-angles :- LaunchAngles] :- (t/HVec [FixedLocations Directions LaunchAngles])
   (if-let [launch-angle (first launch-angles)]
-    (if-let [fixed-locations (drop-while (t/ann-form (fn [[location _]] (not (any-fixed-neighbours? location locations)))
-                                                     [(t/HVec [Coordinate Directions]) -> Boolean])
-                                         (iterate (t/fn [[location directions] :- (t/HVec [Coordinate Directions])] :- (t/HVec [Coordinate Directions])
-                                                    (if (seq directions)
-                                                      [(walk location (first directions))
-                                                       (rest directions)]
-                                                      (throw (IllegalStateException. "Empty directions sequence (likely because it has been exhausted."))))
-                                                  [(spawn launch-angle 10.0) directions]))]
-      (if-let [location-pair (first fixed-locations)]
-        (if-let [remaining-directions (second location-pair)]
-          (if-let [location (first location-pair)]
-            [(fix location locations) directions launch-angles]
-            (throw (IllegalStateException. "Illegal location pair passed")))
-          (throw (IllegalStateException. "No remaining directions element in vector")))
-        (throw (IllegalStateException. "ERROR: Fixed locations has no first element")))
+    (if-let [fixed-locations (->> [(spawn launch-angle 10.0) directions]
+                                  (iterate step)
+                                  (drop-while (t/fn [[location _] :- (t/HVec [Coordinate Directions])] :- Boolean
+                                                (not (or (any-fixed-neighbours? location locations)
+                                                         (outside-kill-radius? location 15.0))))))]
+      (if-let [[location remaining-directions] (first fixed-locations)]
+        (if (outside-kill-radius? location 15.0)
+          [locations directions (rest launch-angles)]
+          [(fix location locations) directions (rest launch-angles)])
+        (throw (IllegalStateException. "No output from walk. This shouldn't occur.")))
       [locations directions launch-angles])
     (throw (IllegalStateException. "Empty launch angles sequence."))))
