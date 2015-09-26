@@ -100,3 +100,43 @@
         (throw (IllegalStateException. "No output from walk. This shouldn't occur.")))
       [locations directions launch-angles])
     (throw (IllegalStateException. "Empty launch angles sequence."))))
+(t/defn random-direction
+  [] :- Direction
+  (rand-nth [:up :down :left :right]))
+
+(t/defn random-directions
+  [] :- Directions
+  (repeatedly random-direction))
+
+(t/ann ^:no-check random-radius [-> Radius])
+(defn random-radius
+  []
+   (rand Math/PI))
+
+(t/defn random-radii
+  [] :- (t/Seq Radius)
+  (repeatedly random-radius))
+
+(t/defn tick*
+  [[locations directions launch-angles] :- (t/HVec [FixedLocations Directions LaunchAngles])] :- (t/HVec [FixedLocations Directions LaunchAngles])
+  (tick locations directions launch-angles))
+
+(t/defn run
+  [number-of-particles :- Integer] :- (t/Option FixedLocations)
+  (when-let [final-state (->> [#{[0 0]} (random-directions) (random-radii)]
+                              (iterate tick*)
+                              (take number-of-particles)
+                              (last))]
+    (when final-state
+      (first final-state))))
+
+(t/ann ^:no-check display [FixedLocations -> nil])
+
+(defn display
+  [locations]
+  (doseq [x (range 60)]
+    (prn (clojure.string/join ""
+                              (for [y (range 60)]
+                                (if (contains? locations [(- x 30) (- y 30)])
+                                  "#"
+                                  " "))))))
