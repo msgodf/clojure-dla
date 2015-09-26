@@ -7,4 +7,4 @@
                  [org.clojure/core.typed "0.3.11"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.8.1"]]
                    :plugins [[lein-typed "0.3.5"]]
-                   :core.typed {:check [game-of-life.core]}}})
+                   :core.typed {:check [clojure-dla.core]}}})
