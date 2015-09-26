@@ -21,9 +21,6 @@
   [] :- (t/Option FixedLocations)
   (set [[0 0]]))
 
-;; discretized circle of specified radius centered around (0,0)
-;; just use cos and sin to get x and y coordinate, add 0.5 and apply floor
-
 (t/defn spawn
   [angle :- LaunchAngle
    radius :- Radius] :- Coordinate
@@ -50,7 +47,6 @@
    coordinate :- Coordinate] :- Boolean
    (locations coordinate))
 
-;; I'm not sure how to specify the type for using a set as a function
 (t/defn any-fixed-neighbours?
   [coordinate :- Coordinate
    locations :- FixedLocations] :- (t/Option Boolean)
