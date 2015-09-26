@@ -79,6 +79,11 @@
     [(walk location (first directions))
      (rest directions)]
     (throw (IllegalStateException. "Empty directions sequence (likely because it has been exhausted."))))
+(t/defn keep-stepping
+  [locations :- FixedLocations
+   [location _] :- (t/HVec [Coordinate Directions])] :- Boolean
+   (not (or (any-fixed-neighbours? location locations)
+            (outside-kill-radius? location 60.0))))
 (t/defn tick
   "Launches a new particle and walks it until it fixes to the existing lattice."
   [locations :- FixedLocations
@@ -87,9 +92,7 @@
   (if-let [launch-angle (first launch-angles)]
     (if-let [fixed-locations (->> [(spawn launch-angle 10.0) directions]
                                   (iterate step)
-                                  (drop-while (t/fn [[location _] :- (t/HVec [Coordinate Directions])] :- Boolean
-                                                (not (or (any-fixed-neighbours? location locations)
-                                                         (outside-kill-radius? location 15.0))))))]
+                                  (drop-while (partial keep-stepping locations)))]
       (if-let [[location remaining-directions] (first fixed-locations)]
         (if (outside-kill-radius? location 15.0)
           [locations directions (rest launch-angles)]
