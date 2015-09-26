@@ -17,8 +17,8 @@
 
 
 (t/defn initialise
-  [] :- (t/Option FixedLocations)
-  (set [[0 0]]))
+  [] :- FixedLocations
+  #{[0 0]})
 
 (t/defn spawn
   [angle :- LaunchAngle
@@ -121,7 +121,7 @@
 
 (t/defn run
   [number-of-particles :- Integer] :- (t/Option FixedLocations)
-  (when-let [final-state (->> [#{[0 0]} (random-directions) (random-radii)]
+  (when-let [final-state (->> [(initialise) (random-directions) (random-radii)]
                               (iterate tick*)
                               (take number-of-particles)
                               (last))]
