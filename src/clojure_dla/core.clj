@@ -1,7 +1,6 @@
 (ns clojure-dla.core
   (:require [clojure.core.typed :refer [ann] :as t]))
 
-(t/defalias Coordinate (t/HVec [Integer Integer]))
 (t/defalias Coordinate (t/HVec [t/AnyInteger t/AnyInteger]))
 
 (t/defalias FixedLocations (t/Set Coordinate))
