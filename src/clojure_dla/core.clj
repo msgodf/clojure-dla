@@ -131,14 +131,16 @@
     (when final-state
       (first final-state))))
 
-(t/ann ^:no-check display [FixedLocations -> nil])
-
-(defn display
-  [locations width height]
-  (doseq [x (range width)]
-    (prn (clojure.string/join ""
-                              (for [y (range height)]
-                                (if (is-fixed? locations [(- x (int (/ width 2)))
-                                                          (- y (int (/ height 2)))])
-                                  "#"
-                                  " "))))))
+(t/defn display
+  [locations :- FixedLocations
+   width :- t/AnyInteger
+   height :- t/AnyInteger] :- nil
+   (doall
+    (t/for [y :- t/AnyInteger (range height)] :- nil
+           (prn (clojure.string/join ""
+                                     (t/for [x :- t/AnyInteger (range width)] :- String
+                                            (if (is-fixed? locations [(- x (int (/ width 2)))
+                                                                      (- y (int (/ height 2)))])
+                                              "#"
+                                             " "))))))
+   nil)
