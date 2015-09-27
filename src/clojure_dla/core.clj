@@ -32,14 +32,14 @@
    (conj locations coordinate))
 
 (t/defn walk
-  [coordinate :- Coordinate
+  [[x y] :- Coordinate
    direction :- Direction] :- Coordinate
-   (case direction
-     :up [(first coordinate) (dec (second coordinate))]
-     :down [(first coordinate) (inc (second coordinate))]
-     :left [(inc (first coordinate)) (second coordinate)]
-     :right [(dec (first coordinate)) (second coordinate)]
-     :default (throw (IllegalArgumentException. "Invalid direction specified in call to walk function"))))
+  (case direction
+    :up [x (dec y)]
+    :down [x (inc y)]
+    :left [(inc x) y]
+    :right [(dec x) y]
+    :default (throw (IllegalArgumentException. "Invalid direction specified in call to walk function"))))
 
 (t/defn is-fixed?
   [locations :- FixedLocations
