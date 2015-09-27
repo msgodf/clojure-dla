@@ -138,7 +138,7 @@
   (doseq [x (range width)]
     (prn (clojure.string/join ""
                               (for [y (range height)]
-                                (if (contains? locations [(- x (int (/ width 2)))
+                                (if (is-fixed? locations [(- x (int (/ width 2)))
                                                           (- y (int (/ height 2)))])
                                   "#"
                                   " "))))))
