@@ -77,26 +77,29 @@
 
 (t/defn keep-stepping
   [locations :- FixedLocations
+   kill-radius :- Radius
    [location _] :- (t/HVec [Coordinate Directions])] :- Boolean
    (not (or (any-fixed-neighbours? location locations)
-            (outside-kill-radius? location 60.0))))
+            (outside-kill-radius? location kill-radius))))
 
 (t/defn tick
   "Launches a new particle and walks it until it fixes to the existing lattice."
   [locations :- FixedLocations
    directions :- Directions
    launch-angles :- LaunchAngles] :- (t/HVec [FixedLocations Directions LaunchAngles])
-  (if-let [launch-angle (first launch-angles)]
-    (if-let [fixed-locations (->> [(spawn launch-angle 10.0) directions]
-                                  (iterate step)
-                                  (drop-while (partial keep-stepping locations)))]
-      (if-let [[location remaining-directions] (first fixed-locations)]
-        (if (outside-kill-radius? location 15.0)
-          [locations directions (rest launch-angles)]
-          [(fix location locations) directions (rest launch-angles)])
-        (throw (IllegalStateException. "No output from walk. This shouldn't occur.")))
-      [locations directions launch-angles])
-    (throw (IllegalStateException. "Empty launch angles sequence."))))
+  (let [launch-radius 10.0
+        kill-radius 15.0]
+    (if-let [launch-angle (first launch-angles)]
+      (if-let [fixed-locations (->> [(spawn launch-angle launch-radius) directions]
+                                    (iterate step)
+                                    (drop-while (partial keep-stepping locations kill-radius)))]
+        (if-let [[location remaining-directions] (first fixed-locations)]
+          (if (outside-kill-radius? location kill-radius)
+            [locations directions (rest launch-angles)]
+            [(fix location locations) directions (rest launch-angles)])
+          (throw (IllegalStateException. "No output from walk. This shouldn't occur.")))
+        [locations directions launch-angles])
+      (throw (IllegalStateException. "Empty launch angles sequence.")))))
 
 (t/defn random-direction
   [] :- Direction
