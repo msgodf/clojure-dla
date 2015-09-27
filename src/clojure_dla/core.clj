@@ -134,10 +134,11 @@
 (t/ann ^:no-check display [FixedLocations -> nil])
 
 (defn display
-  [locations]
-  (doseq [x (range 60)]
+  [locations width height]
+  (doseq [x (range width)]
     (prn (clojure.string/join ""
-                              (for [y (range 60)]
-                                (if (contains? locations [(- x 30) (- y 30)])
+                              (for [y (range height)]
+                                (if (contains? locations [(- x (int (/ width 2)))
+                                                          (- y (int (/ height 2)))])
                                   "#"
                                   " "))))))
